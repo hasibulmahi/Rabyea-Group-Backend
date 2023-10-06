@@ -28,10 +28,22 @@ const projectSchema = new mongoose.Schema({
       ref: "projectExpenses",
     },
   ],
+  labourExpenses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "labourExpenses",
+    },
+  ],
   clientDeposit: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "clientDeposit",
+    },
+  ],
+  clientWithdraw: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "clientWithdraw",
     },
   ],
   payable: {

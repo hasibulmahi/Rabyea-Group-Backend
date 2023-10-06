@@ -1,21 +1,25 @@
-const crypto = require("crypto");
 const catchAsyncError = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/errorhandler");
 const Admin = require("../models/User/adminModel");
 const Client = require("../models/User/clientModel");
 const Project = require("../models/Projects/projectModel");
 const Expenses = require("../models/Projects/projectExpensesModel");
+const Labour = require("../models/Projects/labourExpensesModel");
 const Deposit = require("../models/Projects/clientDepositModel");
+const Withdraw = require("../models/Projects/clientWithdrawModel");
 const AdminDeposit = require("../models/Admin/adminDepositModel");
 const AdminWithdraw = require("../models/Admin/adminWithdrawModel");
 const Salary = require("../models/Utils/salaryModel");
+const Notification = require("../utils/Notification");
 
 /* ===================================================
         Total Revenue (/api/v1/total/revenue) (req : GET)
    =================================================== */
 exports.getRevenue = catchAsyncError(async (req, res, next) => {
   const totalDepositArray = await Deposit.find();
+  const totalWithdrawArray = await Withdraw.find();
   const totalExpensesArray = await Expenses.find();
+  const totalLabourArray = await Labour.find();
   const totalAdminDeposit = await AdminDeposit.find();
   const totalAdminWithdraw = await AdminWithdraw.find();
   const totalSalary = await Salary.find();
@@ -25,6 +29,12 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
     return val.amount;
   });
   const deposit = totalDepositArray.map((val) => {
+    return val.amount;
+  });
+  const labour = totalLabourArray.map((val) => {
+    return val.amount;
+  });
+  const withdraw = totalWithdrawArray.map((val) => {
     return val.amount;
   });
   const admindeposit = totalAdminDeposit.map((val) => {
@@ -38,6 +48,8 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
   });
   let totalExpenses = 0;
   let totalDeposit = 0;
+  let totalLabour = 0;
+  let totalWithdraw = 0;
   let totaladminDeposit = 0;
   let totaladminWithdraw = 0;
   let totalSalaryAmount = 0;
@@ -46,6 +58,12 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
   }
   for (var i = 0; i < deposit.length; i++) {
     totalDeposit = totalDeposit + deposit[i];
+  }
+  for (var i = 0; i < labour.length; i++) {
+    totalLabour = totalLabour + labour[i];
+  }
+  for (var i = 0; i < withdraw.length; i++) {
+    totalWithdraw = totalWithdraw + withdraw[i];
   }
 
   for (var i = 0; i < admindeposit.length; i++) {
@@ -65,7 +83,9 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
     totaladminDeposit -
     totalExpenses -
     totaladminWithdraw -
-    totalSalaryAmount;
+    totalSalaryAmount -
+    totalWithdraw -
+    totalLabour;
 
   //Daily Array Calculation
   function ArrayCalculation(Array) {
@@ -107,6 +127,30 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
   }
   const dailyDAmount = ArrayCalculation(dailyDeposit);
 
+  let dailyLabour = [];
+  for (var i = 0; i < totalLabourArray.length; i++) {
+    let date = totalLabourArray[i].createdAt.getDate();
+    let month = totalLabourArray[i].createdAt.getMonth();
+    let year = totalLabourArray[i].createdAt.getFullYear();
+    const valueMatch = `${date}/${month}/${year}`;
+    if (todayMatch == valueMatch) {
+      dailyLabour.push(totalLabourArray[i]);
+    }
+  }
+  const dailyLAmount = ArrayCalculation(dailyLabour);
+
+  let dailyWithdraw = [];
+  for (var i = 0; i < totalWithdrawArray.length; i++) {
+    let date = totalWithdrawArray[i].createdAt.getDate();
+    let month = totalWithdrawArray[i].createdAt.getMonth();
+    let year = totalWithdrawArray[i].createdAt.getFullYear();
+    const valueMatch = `${date}/${month}/${year}`;
+    if (todayMatch === valueMatch) {
+      dailyWithdraw.push(totalWithdrawArray[i]);
+    }
+  }
+  const dailyWAmount = ArrayCalculation(dailyWithdraw);
+
   let dailyAdminDeposit = [];
   for (var i = 0; i < totalAdminDeposit.length; i++) {
     let date = totalAdminDeposit[i].createdAt.getDate();
@@ -143,7 +187,13 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
   }
   const dailySAmount = ArrayCalculation(dailySalary);
   const dailyRevenue =
-    dailyDAmount + dailyADAmount - dailyEAmount - dailyAWAmount - dailySAmount;
+    dailyDAmount +
+    dailyADAmount -
+    dailyEAmount -
+    dailyAWAmount -
+    dailySAmount -
+    dailyLAmount -
+    dailyWAmount;
   res.status(200).json({
     success: true,
     revenue,
@@ -156,7 +206,9 @@ exports.getRevenue = catchAsyncError(async (req, res, next) => {
    =================================================== */
 exports.getMonthlyRevenue = catchAsyncError(async (req, res, next) => {
   const totalDepositArray = await Deposit.find();
+  const totalWithdrawArray = await Withdraw.find();
   const totalExpensesArray = await Expenses.find();
+  const totalLabourArray = await Labour.find();
   const totalAdminDeposit = await AdminDeposit.find();
   const totalAdminWithdraw = await AdminWithdraw.find();
   const totalSalary = await Salary.find();
@@ -175,6 +227,8 @@ exports.getMonthlyRevenue = catchAsyncError(async (req, res, next) => {
 
   let yearlyExpenses = [];
   let yearlyDeposit = [];
+  let yearlyLabour = [];
+  let yearlyWithdraw = [];
   let yearlyADeposit = [];
   let yearlyAWithdraw = [];
   let yearlySalary = [];
@@ -183,6 +237,12 @@ exports.getMonthlyRevenue = catchAsyncError(async (req, res, next) => {
     (val) => val.createdAt.getFullYear() === DATE.getFullYear()
   );
   yearlyDeposit = totalDepositArray.filter(
+    (val) => val.createdAt.getFullYear() === DATE.getFullYear()
+  );
+  yearlyLabour = totalLabourArray.filter(
+    (val) => val.createdAt.getFullYear() === DATE.getFullYear()
+  );
+  yearlyWithdraw = totalWithdrawArray.filter(
     (val) => val.createdAt.getFullYear() === DATE.getFullYear()
   );
   yearlyADeposit = totalAdminDeposit.filter(
@@ -338,6 +398,150 @@ exports.getMonthlyRevenue = catchAsyncError(async (req, res, next) => {
     (val) => val.createdAt.getMonth() === 11
   );
   const decDAmount = ArrayCalculation(decDeposit);
+
+  //Monthly Labour Expenses
+  const janLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 0
+  );
+  const janLAmount = ArrayCalculation(janLabour);
+
+  //February
+  const febLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 1
+  );
+  const febLAmount = ArrayCalculation(febLabour);
+
+  //March
+  const marLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 2
+  );
+  const marLAmount = ArrayCalculation(marLabour);
+
+  //April
+  const aprLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 3
+  );
+  const aprLAmount = ArrayCalculation(aprLabour);
+
+  //May
+  const mayLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 4
+  );
+  const mayLAmount = ArrayCalculation(mayLabour);
+
+  //June
+  const junLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 5
+  );
+  const junLAmount = ArrayCalculation(junLabour);
+
+  //July
+  const julLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 6
+  );
+  const julLAmount = ArrayCalculation(julLabour);
+
+  //Augest
+  const augLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 7
+  );
+  const augLAmount = ArrayCalculation(augLabour);
+
+  //September
+  const sepLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 8
+  );
+  const sepLAmount = ArrayCalculation(sepLabour);
+
+  //October
+  const octLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 9
+  );
+  const octLAmount = ArrayCalculation(octLabour);
+
+  //November
+  const novLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 10
+  );
+  const novLAmount = ArrayCalculation(novLabour);
+
+  //Decempber
+  const decLabour = yearlyLabour.filter(
+    (val) => val.createdAt.getMonth() === 11
+  );
+  const decLAmount = ArrayCalculation(decLabour);
+
+  //Monthly Deposit
+  const janWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 0
+  );
+  const janWAmount = ArrayCalculation(janWithdraw);
+
+  //February
+  const febWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 1
+  );
+  const febWAmount = ArrayCalculation(febWithdraw);
+
+  //March
+  const marWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 2
+  );
+  const marWAmount = ArrayCalculation(marWithdraw);
+
+  //April
+  const aprWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 3
+  );
+  const aprWAmount = ArrayCalculation(aprWithdraw);
+
+  //May
+  const mayWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 4
+  );
+  const mayWAmount = ArrayCalculation(mayWithdraw);
+
+  //June
+  const junWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 5
+  );
+  const junWAmount = ArrayCalculation(junWithdraw);
+
+  //July
+  const julWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 6
+  );
+  const julWAmount = ArrayCalculation(julWithdraw);
+
+  //Augest
+  const augWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 7
+  );
+  const augWAmount = ArrayCalculation(augWithdraw);
+
+  //September
+  const sepWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 8
+  );
+  const sepWAmount = ArrayCalculation(sepWithdraw);
+
+  //October
+  const octWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 9
+  );
+  const octWAmount = ArrayCalculation(octWithdraw);
+
+  //November
+  const novWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 10
+  );
+  const novWAmount = ArrayCalculation(novWithdraw);
+
+  //Decempber
+  const decWithdraw = yearlyWithdraw.filter(
+    (val) => val.createdAt.getMonth() === 11
+  );
+  const decWAmount = ArrayCalculation(decWithdraw);
 
   //Monthly Admin Deposit
   const janADeposit = yearlyADeposit.filter(
@@ -556,29 +760,101 @@ exports.getMonthlyRevenue = catchAsyncError(async (req, res, next) => {
   const decSAmount = ArrayCalculation(decSalary);
 
   const janRevenue =
-    janDAmount - janEAmount + janADAmount - janAWAmount - janSAmount;
+    janDAmount -
+    janEAmount +
+    janADAmount -
+    janAWAmount -
+    janSAmount -
+    janLAmount -
+    janWAmount;
   const febRevenue =
-    febDAmount - febEAmount + febADAmount - febAWAmount - febSAmount;
+    febDAmount -
+    febEAmount +
+    febADAmount -
+    febAWAmount -
+    febSAmount -
+    febLAmount -
+    febWAmount;
   const marRevenue =
-    marDAmount - marEAmount + marADAmount - marAWAmount - marSAmount;
+    marDAmount -
+    marEAmount +
+    marADAmount -
+    marAWAmount -
+    marSAmount -
+    marLAmount -
+    marWAmount;
   const aprRevenue =
-    aprDAmount - aprEAmount + aprADAmount - aprAWAmount - aprSAmount;
+    aprDAmount -
+    aprEAmount +
+    aprADAmount -
+    aprAWAmount -
+    aprSAmount -
+    aprLAmount -
+    aprWAmount;
   const mayRevenue =
-    mayDAmount - mayEAmount + mayADAmount - mayAWAmount - maySAmount;
+    mayDAmount -
+    mayEAmount +
+    mayADAmount -
+    mayAWAmount -
+    maySAmount -
+    mayLAmount -
+    mayWAmount;
   const junRevenue =
-    junDAmount - junEAmount + junADAmount - junAWAmount - junSAmount;
+    junDAmount -
+    junEAmount +
+    junADAmount -
+    junAWAmount -
+    junSAmount -
+    junLAmount -
+    junWAmount;
   const julRevenue =
-    julDAmount - julEAmount + julADAmount - julAWAmount - julSAmount;
+    julDAmount -
+    julEAmount +
+    julADAmount -
+    julAWAmount -
+    julSAmount -
+    julLAmount -
+    julWAmount;
   const augRevenue =
-    augDAmount - augEAmount + augADAmount - augAWAmount - augSAmount;
+    augDAmount -
+    augEAmount +
+    augADAmount -
+    augAWAmount -
+    augSAmount -
+    augLAmount -
+    augWAmount;
   const sepRevenue =
-    sepDAmount - sepEAmount + sepADAmount - sepAWAmount - sepSAmount;
+    sepDAmount -
+    sepEAmount +
+    sepADAmount -
+    sepAWAmount -
+    sepSAmount -
+    sepLAmount -
+    sepWAmount;
   const octRevenue =
-    octDAmount - octEAmount + octADAmount - octAWAmount - octSAmount;
+    octDAmount -
+    octEAmount +
+    octADAmount -
+    octAWAmount -
+    octSAmount -
+    octLAmount -
+    octWAmount;
   const novRevenue =
-    novDAmount - novEAmount + novADAmount - novAWAmount - novSAmount;
+    novDAmount -
+    novEAmount +
+    novADAmount -
+    novAWAmount -
+    novSAmount -
+    novLAmount -
+    novWAmount;
   const decRevenue =
-    decDAmount - decEAmount + decADAmount - decAWAmount - decSAmount;
+    decDAmount -
+    decEAmount +
+    decADAmount -
+    decAWAmount -
+    decSAmount -
+    decLAmount -
+    decWAmount;
 
   const monthlyRevenueArray = [
     janRevenue,
@@ -657,10 +933,21 @@ exports.createWithdraw = catchAsyncError(async (req, res, next) => {
     await user.totalWithdraw.push(withdraw._id);
     await user.save();
   }
-  res.status(200).json({
-    success: true,
-    message: "Withdraw Successfull",
-  });
+
+  try {
+    await Notification({
+      senderType: "Admin",
+      sender: req.user._id,
+      message: "Withdraw Created",
+      amount: amount,
+    });
+    res.status(200).json({
+      success: true,
+      message: "Withdraw Successfull",
+    });
+  } catch (err) {
+    return next(new ErrorHandler(`${err}`, 401));
+  }
 });
 
 /* ======================================================================
@@ -706,11 +993,21 @@ exports.deleteDeposit = catchAsyncError(async (req, res, next) => {
     await admin.totalDeposit.splice(0, index);
     await admin.save();
   }
-  const allDeposit = await AdminWithdraw.find({ owner: req.user._id });
-  res.status(200).json({
-    success: true,
-    message: "Deposit Delete Successfully",
-  });
+  await AdminWithdraw.find({ owner: req.user._id });
+  try {
+    await Notification({
+      senderType: "Admin",
+      sender: req.user._id,
+      message: "Deposit Delete",
+      amount: deposit.amount,
+    });
+    res.status(200).json({
+      success: true,
+      message: "Deposit Delete Successfully",
+    });
+  } catch (err) {
+    return next(new ErrorHandler(`${err}`, 401));
+  }
 });
 /* ======================================================================
         Delete Withdraw (/api/v1/delete/withdraw/:id) (req : delete)
@@ -727,11 +1024,21 @@ exports.deleteWithdraw = catchAsyncError(async (req, res, next) => {
     await admin.totalWithdraw.splice(0, index);
     await admin.save();
   }
-  const allWithdraw = await AdminWithdraw.find({ owner: req.user._id });
-  res.status(200).json({
-    success: true,
-    message: "Withdraw Delete Successfully",
-  });
+  await AdminWithdraw.find({ owner: req.user._id });
+  try {
+    await Notification({
+      senderType: "Admin",
+      sender: req.user._id,
+      message: "Withdraw Delete",
+      amount: withdraw.amount,
+    });
+    res.status(200).json({
+      success: true,
+      message: "Withdraw Delete Successfully",
+    });
+  } catch (err) {
+    return next(new ErrorHandler(`${err}`, 401));
+  }
 });
 
 /* ======================================================================

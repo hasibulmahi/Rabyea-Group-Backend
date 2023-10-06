@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
 
-const notificationSchema = new mongoose.Schema({
+const adminNotificationSchema = new mongoose.Schema({
   sender: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "client",
+    ref: "admin",
   },
   message: {
     type: String,
+  },
+  amount: {
+    type: Number,
   },
   createdAt: {
     type: Date,
@@ -14,4 +17,4 @@ const notificationSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("notification", notificationSchema);
+module.exports = mongoose.model("adminNotification", adminNotificationSchema);

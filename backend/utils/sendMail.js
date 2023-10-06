@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
 const REFRESH_TOKEN =
-  "1//0461NTy0Yj3NkCgYIARAAGAQSNwF-L9IrQ2mUEnu2Paisn2lpcDn61wg3QiwH6qk0sLYMquKIfbI_doRhXHwFK1UCkSdXPbJ9UIA";
+  "1//04W-2COVeBMHqCgYIARAAGAQSNwF-L9IrGZY7rcMeeWW3dQLSkFPrHnnLPg9Uqw_e7QfEjesNtn0NWMXIs-dCEtQV0_8OrttNMYA";
 const CLIENT_ID =
   "448514247810-dbo8o1q7vbhni038tsjqu1c2lr3q3r3b.apps.googleusercontent.com";
 const CLIENT_SECRET = "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";

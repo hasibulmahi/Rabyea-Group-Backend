@@ -8,7 +8,9 @@ const Project = require("../models/Projects/projectModel");
 exports.activeProjectData = catchAsyncError(async (req, res, next) => {
   const project = await Project.findById(req.user.activeProject)
     .populate("totalExpenses")
-    .populate("clientDeposit");
+    .populate("labourExpenses")
+    .populate("clientDeposit")
+    .populate("clientWithdraw");
 
   if (!project) {
     return next(new ErrorHandler("Project Not Found", 400));

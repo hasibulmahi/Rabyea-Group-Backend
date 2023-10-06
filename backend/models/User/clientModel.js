@@ -52,6 +52,13 @@ const clientSchema = new mongoose.Schema({
       ref: "clientDeposit",
     },
   ],
+
+  totalRecieve: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "clientWithdraw",
+    },
+  ],
   allProject: [
     {
       type: mongoose.Schema.Types.ObjectId,

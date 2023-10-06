@@ -9,6 +9,10 @@ const {
   activeProjectData,
   deleteDeposit,
   createDeposit,
+  labourExpenses,
+  deleteLabourExpenses,
+  createWithdraw,
+  deleteWithdraw,
 } = require("../controllers/managerControllers");
 
 router
@@ -24,12 +28,26 @@ router
 router
   .route("/delete/project/expenses/:id")
   .delete(isAuthenticatedUser, authorizeRoles("Manager"), deleteExpenses);
+
+router
+  .route("/labour/expenses")
+  .post(isAuthenticatedUser, authorizeRoles("Manager"), labourExpenses);
+router
+  .route("/delete/labour/expenses/:id")
+  .delete(isAuthenticatedUser, authorizeRoles("Manager"), deleteLabourExpenses);
 router
   .route("/project/deposit")
   .post(isAuthenticatedUser, authorizeRoles("Manager"), createDeposit);
 router
   .route("/delete/project/deposit/:id")
   .delete(isAuthenticatedUser, authorizeRoles("Manager"), deleteDeposit);
+router
+  .route("/project/withdraw")
+  .post(isAuthenticatedUser, authorizeRoles("Manager"), createWithdraw);
+router
+  .route("/delete/project/withdraw/:id")
+  .delete(isAuthenticatedUser, authorizeRoles("Manager"), deleteWithdraw);
+
 router.route("/get/project/:id").get();
 
 module.exports = router;
