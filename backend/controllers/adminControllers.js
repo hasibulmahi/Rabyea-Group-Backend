@@ -11,6 +11,7 @@ const AdminDeposit = require("../models/Admin/adminDepositModel");
 const AdminWithdraw = require("../models/Admin/adminWithdrawModel");
 const Salary = require("../models/Utils/salaryModel");
 const Notification = require("../utils/Notification");
+const createNotification = require("../utils/Notification");
 
 /* ===================================================
         Total Revenue (/api/v1/total/revenue) (req : GET)
@@ -908,6 +909,16 @@ exports.createDeposit = catchAsyncError(async (req, res, next) => {
     await user.totalDeposit.push(deposit._id);
     await user.save();
   }
+  try {
+    await createNotification({
+      senderType: "Admin",
+      message: `${req.user.code} Deposit`,
+      amount: amount,
+      sender: req.user._id,
+    });
+  } catch (err) {
+    return next(new ErrorHandler(err));
+  }
   res.status(200).json({
     success: true,
     message: "Deposit Successfull",
@@ -938,7 +949,7 @@ exports.createWithdraw = catchAsyncError(async (req, res, next) => {
     await Notification({
       senderType: "Admin",
       sender: req.user._id,
-      message: "Withdraw Created",
+      message: `${req.user.code} Withdraw`,
       amount: amount,
     });
     res.status(200).json({
@@ -998,7 +1009,7 @@ exports.deleteDeposit = catchAsyncError(async (req, res, next) => {
     await Notification({
       senderType: "Admin",
       sender: req.user._id,
-      message: "Deposit Delete",
+      message: `${req.user.code} Deposit Delete`,
       amount: deposit.amount,
     });
     res.status(200).json({
@@ -1029,7 +1040,7 @@ exports.deleteWithdraw = catchAsyncError(async (req, res, next) => {
     await Notification({
       senderType: "Admin",
       sender: req.user._id,
-      message: "Withdraw Delete",
+      message: `${req.user.code} Withdraw Delete`,
       amount: withdraw.amount,
     });
     res.status(200).json({

@@ -393,7 +393,7 @@ exports.deleteWithdraw = catchAsyncError(async (req, res, next) => {
   }
   const withdraw = await Withdraw.findById(req.params.id);
   if (!withdraw) {
-    return next(new ErrorHandler("Project Deposit Not Found", 404));
+    return next(new ErrorHandler("Project Withdraw Not Found", 404));
   }
 
   await Withdraw.findByIdAndDelete(req.params.id);
@@ -417,12 +417,12 @@ exports.deleteWithdraw = catchAsyncError(async (req, res, next) => {
     await Notification({
       senderType: "Manager",
       sender: req.user._id,
-      message: "Client Credit Delete",
+      message: "Client Debit Delete",
       projectId: project._id,
     });
     res.status(200).json({
       success: true,
-      message: "Successfully Credit Deleted",
+      message: "Successfully Debit Deleted",
       project: projectUpdate,
     });
   } catch (err) {

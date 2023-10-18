@@ -9,6 +9,10 @@ const Client = require("../models/User/clientModel");
 const Project = require("../models/Projects/projectModel");
 const Salary = require("../models/Utils/salaryModel");
 
+const AdminNotification = require("../models/Utils/adminNotification");
+const ManagerNotification = require("../models/Utils/managerNotification");
+const ClientNotification = require("../models/Utils/clientNotification");
+
 /* ===================================================
         Create Subadmin (/api/v1/subadmin/create) (req : POST)
    =================================================== */
@@ -373,7 +377,12 @@ exports.getAllProject = catchAsyncError(async (req, res, next) => {
         Get Single Project (/api/v1/get/project/:id) (req : Get)
    =================================================== */
 exports.getProject = catchAsyncError(async (req, res, next) => {
-  const project = await Project.findById(req.params.id);
+  const project = await Project.findById(req.params.id)
+    .populate("clientDeposit")
+    .populate("clientWithdraw")
+    .populate("labourExpenses")
+    .populate("totalExpenses")
+    .populate("manager");
 
   if (!project) {
     return next(new ErrorHandler(`No Project Found`));
@@ -429,5 +438,55 @@ exports.paymentCreate = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Successfully Salary Paid",
+  });
+});
+
+/* =================================================================
+        Get Admin Notification (/api/v1/admin/notification) (req : Get)
+   ==================================================================== */
+exports.getAdminNotification = catchAsyncError(async (req, res, next) => {
+  const admin = await AdminNotification.find().populate("sender");
+
+  res.status(200).json({
+    success: true,
+    adminNotification: admin,
+  });
+});
+
+/* =================================================================
+        Get Manager Notification (/api/v1/menager/notification) (req : Get)
+   ==================================================================== */
+exports.getManagerNotification = catchAsyncError(async (req, res, next) => {
+  const manager = await ManagerNotification.find().populate("sender");
+  // .populate({
+  //   path: "sender",
+  //   populate: {
+  //     path: "activeProject",
+  //   },
+  // });
+
+  res.status(200).json({
+    success: true,
+    managerNotification: manager,
+  });
+});
+
+/* =================================================================
+        Get Client Notification (/api/v1/client/notification) (req : Get)
+   ==================================================================== */
+exports.getClientNotification = catchAsyncError(async (req, res, next) => {
+  const clientN = await ClientNotification.find()
+    .populate("sender")
+    .populate({
+      path: "project",
+      populate: {
+        path: "manager",
+      },
+    });
+
+  res.status(200).json({
+    success: true,
+    clientNotification: clientN,
+    // message: "Hello",
   });
 });

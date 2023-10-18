@@ -9,7 +9,8 @@ const clientNotificationSchema = new mongoose.Schema({
     type: String,
   },
   project: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "project",
   },
   createdAt: {
     type: Date,

@@ -20,6 +20,9 @@ const {
   getProjectManager,
   getProjectClient,
   paymentCreate,
+  getAdminNotification,
+  getManagerNotification,
+  getClientNotification,
 } = require("../controllers/hrControllers");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
 
@@ -80,5 +83,15 @@ router
 router
   .route("/payment/create")
   .post(isAuthenticatedUser, authorizeRoles("Hr"), paymentCreate);
+
+router
+  .route("/admin/notification")
+  .get(isAuthenticatedUser, authorizeRoles("Hr"), getAdminNotification);
+router
+  .route("/maneger/notification")
+  .get(isAuthenticatedUser, authorizeRoles("Hr"), getManagerNotification);
+router
+  .route("/get/client/notification")
+  .get(isAuthenticatedUser, authorizeRoles("Hr"), getClientNotification);
 
 module.exports = router;

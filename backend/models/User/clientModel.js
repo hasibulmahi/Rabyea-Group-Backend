@@ -69,6 +69,12 @@ const clientSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",
   },
+  notification: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "clientNotification",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
