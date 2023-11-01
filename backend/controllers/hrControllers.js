@@ -457,13 +457,14 @@ exports.getAdminNotification = catchAsyncError(async (req, res, next) => {
         Get Manager Notification (/api/v1/menager/notification) (req : Get)
    ==================================================================== */
 exports.getManagerNotification = catchAsyncError(async (req, res, next) => {
-  const manager = await ManagerNotification.find().populate("sender");
-  // .populate({
-  //   path: "sender",
-  //   populate: {
-  //     path: "activeProject",
-  //   },
-  // });
+  const manager = await ManagerNotification.find()
+    .populate("sender")
+    .populate({
+      path: "sender",
+      populate: {
+        path: "activeProject",
+      },
+    });
 
   res.status(200).json({
     success: true,

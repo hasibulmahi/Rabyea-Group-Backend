@@ -8,8 +8,18 @@ const projectExpensesSchema = new mongoose.Schema({
   title: {
     type: String,
   },
+  uom: { type: String },
+  qty: {
+    type: Number,
+  },
+  unitPrice: {
+    type: Number,
+  },
   amount: {
     type: Number,
+  },
+  remarks: {
+    type: String,
   },
   createdAt: {
     type: Date,

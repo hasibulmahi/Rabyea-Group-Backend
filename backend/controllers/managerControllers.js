@@ -68,7 +68,11 @@ exports.createExpenses = catchAsyncError(async (req, res, next) => {
   const data = {
     projectManager: manager._id,
     title: req.body.title,
+    uom: req.body.uom,
+    qty: req.body.qty,
+    unitPrice: req.body.unit,
     amount: req.body.amount,
+    remarks: req.body.remarks,
   };
   const expenses = await Expenses.create(data);
   if (expenses) {
@@ -85,6 +89,7 @@ exports.createExpenses = catchAsyncError(async (req, res, next) => {
       senderType: "Manager",
       sender: req.user._id,
       message: "Metiral Cost Added",
+      amount: expenses.amount,
       projectId: project._id,
     });
     res.status(200).json({
@@ -125,6 +130,7 @@ exports.deleteExpenses = catchAsyncError(async (req, res, next) => {
       senderType: "Manager",
       sender: req.user._id,
       message: "Metiral Cost Deleted",
+      amount: expenses.amount,
       projectId: project._id,
     });
     res.status(200).json({
@@ -170,6 +176,7 @@ exports.labourExpenses = catchAsyncError(async (req, res, next) => {
       senderType: "Manager",
       sender: req.user._id,
       message: "Labour Cost Added",
+      amount: req.body.amount,
       projectId: project._id,
     });
     res.status(200).json({
@@ -210,6 +217,7 @@ exports.deleteLabourExpenses = catchAsyncError(async (req, res, next) => {
       senderType: "Manager",
       sender: req.user._id,
       message: "Labour Cost Deleted",
+      amount: expenses.amount,
       projectId: project._id,
     });
     res.status(200).json({
@@ -272,6 +280,7 @@ exports.createDeposit = catchAsyncError(async (req, res, next) => {
       senderType: "Manager",
       sender: req.user._id,
       message: "Client Credit",
+      amount: req.body.amount,
       projectId: project._id,
     });
     res.status(200).json({
@@ -319,6 +328,7 @@ exports.deleteDeposit = catchAsyncError(async (req, res, next) => {
     await Notification({
       senderType: "Manager",
       sender: req.user._id,
+      amount: deposit.amount,
       message: "Client Credit Delete",
       projectId: project._id,
     });

@@ -27,13 +27,18 @@
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
+    "fs": "^0.0.1-security",
     "googleapis": "^126.0.1",
+    "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "nodemailer": "^6.9.4",
     "nodemon": "^3.0.1",
+    "pdf-creator-node": "^2.3.5",
+    "pdf-puppeteer": "^1.1.11",
     "validator": "^13.11.0"
   }
 }

@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 const errorMiddleware = require("./backend/middleware/error");
+const path = require("path");
 
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
@@ -13,6 +14,8 @@ app.use(
   fileUpload({ limits: { fieldSize: 50 * 1024 * 1024 }, useTempFiles: true })
 );
 app.use(cors({ origin: "*" }));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/docs", express.static(path.join(__dirname, "docs")));
 
 //Route Imports
 const user = require("./backend/routes/authRoutes");

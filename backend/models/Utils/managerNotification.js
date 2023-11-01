@@ -12,6 +12,7 @@ const managerNotificationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",
   },
+  amount: { type: String },
   createdAt: {
     type: Date,
     default: Date.now,

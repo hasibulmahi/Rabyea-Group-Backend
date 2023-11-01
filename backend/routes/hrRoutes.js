@@ -25,6 +25,10 @@ const {
   getClientNotification,
 } = require("../controllers/hrControllers");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
+const {
+  meterialExpensesGenaratePdf,
+  getMeterialPdf,
+} = require("../controllers/generatePdf");
 
 router
   .route("/admin/create")
@@ -93,5 +97,12 @@ router
 router
   .route("/get/client/notification")
   .get(isAuthenticatedUser, authorizeRoles("Hr"), getClientNotification);
+
+router
+  .route("/meterial/genarate/pdf/:id")
+  .post(isAuthenticatedUser, authorizeRoles("Hr"), meterialExpensesGenaratePdf);
+router
+  .route("/meterial/pdf")
+  .get(isAuthenticatedUser, authorizeRoles("Hr"), getMeterialPdf);
 
 module.exports = router;
