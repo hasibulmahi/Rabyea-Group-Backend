@@ -13,7 +13,14 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use(
   fileUpload({ limits: { fieldSize: 50 * 1024 * 1024 }, useTempFiles: true })
 );
-app.use(cors({ origin: "*" }));
+// app.use(cors({ origin: "*" }));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", ["*"]);
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
