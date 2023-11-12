@@ -17,6 +17,7 @@ app.use(cors({ origin: "*" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
+// This are all route import
 //Route Imports
 const user = require("./backend/routes/authRoutes");
 const Admin = require("./backend/routes/adminRoutes");
